@@ -89,15 +89,20 @@ Adafruit_SSD1306 display = Adafruit_SSD1306();
 
 // RGB LED (WS2812B)
 // pin 10
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(1, 10, NEO_GRB + NEO_KHZ800);
+#define RGB_LED_PIN 10
+#define RGB_LED_PIXELS 3
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(RGB_LED_PIXELS, RGB_LED_PIN, NEO_GRB + NEO_KHZ800);
+uint32_t green = pixels.Color(0, 64, 0);
+uint32_t yellow = pixels.Color(32, 32, 0);
+uint32_t red = pixels.Color(64, 0, 0);
 
 
 void setup() {
-  // Open serial communications and wait for port to open:
+  // Open serial communications
   Serial.begin(9600);
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
-  }
+//  while (!Serial) {
+//    ; // wait for serial port to connect. Needed for native USB port only
+//  }
 
   i2cuart.begin(9600);
 
@@ -161,6 +166,20 @@ void loop() {
   dataString += String(ppm);
   dataString += ",";
 
+  if (ppm < 2000.0) {
+    // Green
+    Serial.println("PPM is green");
+    pixels.setPixelColor(1, green);
+  } else if (ppm < 8000.0) {
+    // Yellow
+    Serial.println("PPM is yellow");
+    pixels.setPixelColor(1, yellow);
+  } else {
+    // Red
+    Serial.println("PPM is red");
+    pixels.setPixelColor(1, red);
+  }
+  pixels.show();
 
   // Pressure - BMP280
   // connection: i2c
@@ -175,6 +194,21 @@ void loop() {
   dataString += String(pressure);
   dataString += ",";
 
+  if (pressure < 250000.0) {
+    // Green
+    Serial.println("Pressure is green");
+    pixels.setPixelColor(2, green);
+  } else if (pressure < 35000
+  0.0) {
+    // Yellow
+    Serial.println("Pressure is yellow");
+    pixels.setPixelColor(2, yellow);
+  } else {
+    // Red
+    Serial.println("Pressure is red");
+    pixels.setPixelColor(2, red);
+  }
+  pixels.show();
 
   // Temperature - MCP9808
   // connection: I2C (address 0x18)
@@ -184,6 +218,20 @@ void loop() {
   dataString += String(temperature);
   dataString += ",";
 
+  if (temperature < 75.0) {
+    // Green
+    Serial.println("Temperature is green");
+    pixels.setPixelColor(1, green);
+  } else if (temperature < 80.0) {
+    // Yellow
+    Serial.println("Temperature is yellow");
+    pixels.setPixelColor(1, yellow);
+  } else {
+    // Red
+    Serial.println("Temperature is red");
+    pixels.setPixelColor(1, red);
+  }
+  pixels.show();
 
   // Humidity - DHT11
   // connection: exclusive digital pin
@@ -194,25 +242,20 @@ void loop() {
 //  float temperature = dht.readTemperature();
   dataString += String(humidity);
 
-//  pixels.setPixelColor(1, pixels.Color(255,0,0));
-  // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
   if (humidity < 60.0) {
     // Green
     Serial.println("Humidity is green");
-    pixels.setPixelColor(1, pixels.Color(0,255,0));
+    pixels.setPixelColor(0, green);
   } else if (humidity < 70.0) {
     // Yellow
     Serial.println("Humidity is yellow");
-    pixels.setPixelColor(1, pixels.Color(255,255,0));
+    pixels.setPixelColor(0, yellow);
   } else {
     // Red
     Serial.println("Humidity is red");
-    pixels.setPixelColor(1, pixels.Color(255,0,0));
+    pixels.setPixelColor(0, red);
   }
   pixels.show();
-//  delay(1000);
-//  pixels.setPixelColor(1, 0);
-//  pixels.show();
 
   // open the file (only one file can be open at a time)
   File dataFile = SD.open("datalog.txt", FILE_WRITE);
