@@ -24,7 +24,7 @@
 #include <Adafruit_SSD1306.h>
 
 // RGB LED display
-#include <Adafruit_NeoPixel.h>
+#include <Adafruit_DotStar.h>
 
 /*
  Monitor
@@ -38,12 +38,12 @@
  * Output
  ** SD card - SPI - CS pin 4
  ** OLED - I2C - address ???
- ** RGB LEDs - pin 10
+ ** RGB LEDs - pins 10 and 11
  *
  * SPI bus pinout
- ** MOSI - pin 11
- ** MISO - pin 12
- ** CLK - pin 13
+ ** MOSI - pin 23
+ ** MISO - pin 22
+ ** CLK - pin 24
  * 
  * I2C bus pinout
  ** SCL - pin 21
@@ -75,14 +75,20 @@ const int cardChipSelect = 4;
 #define LED      13
 Adafruit_SSD1306 display = Adafruit_SSD1306();
 
-// RGB LEDs (WS2812B)
-#define RGB_LED_PIN 10
+// RGB LEDs (
+#define RGB_LED_CLOCK_PIN 11
+#define RGB_LED_DATA_PIN 10
 #define RGB_LED_PIXELS 4
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(RGB_LED_PIXELS, RGB_LED_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_DotStar pixels = Adafruit_DotStar(
+  RGB_LED_PIXELS,
+  RGB_LED_DATA_PIN,
+  RGB_LED_CLOCK_PIN,
+  DOTSTAR_BGR);
 uint32_t green = pixels.Color(0, 64, 0);
 uint32_t yellow = pixels.Color(32, 32, 0);
 uint32_t red = pixels.Color(64, 0, 0);
 
+#define VBATPIN A7
 
 void setup() {
   // Open serial communications
@@ -251,6 +257,12 @@ void loop() {
     // file not available
     Serial.println("error opening datalog file");
   }
+
+  float measuredvbat = analogRead(VBATPIN);
+  measuredvbat *= 2;    // we divided by 2, so multiply back
+  measuredvbat *= 3.3;  // Multiply by 3.3V, our reference voltage
+  measuredvbat /= 1024; // convert to voltage
+  Serial.print("VBat: " ); Serial.println(measuredvbat);
 
   // OLED display
   display.clearDisplay();
